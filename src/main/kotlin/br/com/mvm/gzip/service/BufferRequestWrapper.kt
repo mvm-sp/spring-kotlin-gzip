@@ -19,7 +19,7 @@ class BufferRequestWrapper : HttpServletRequestWrapper {
         // Read InputStream and store its content in a buffer.
         val inputStream : InputStream = req.inputStream
         this.arrOutputStream = ByteArrayOutputStream()
-        val buf = ByteArray(1024)
+        val buf = ByteArray(4096)
         var read: Int
         while (inputStream.read(buf).also { read = it } > 0) {
             arrOutputStream!!.write(buf, 0, read)

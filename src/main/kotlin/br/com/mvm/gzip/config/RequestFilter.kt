@@ -27,6 +27,8 @@ class RequestFilter : Filter {
 
         log.info("2. doFilter method.")
 
+        val zipHandler = CompressHandler()
+
         val requestMap = getTypeSafeRequestMap(request   as HttpServletRequest)
 
         val body : String
@@ -53,7 +55,7 @@ class RequestFilter : Filter {
             if(requestMap.isEmpty()){
                 body = bufferedRequest.getRequestBody().toString()
             }else{
-                body ="gzip"
+                body =  "TODO" //zipHandler.unZipStream(request.inputStream).toString()
             }
         }
 

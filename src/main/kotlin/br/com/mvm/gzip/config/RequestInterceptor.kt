@@ -12,13 +12,13 @@ import javax.servlet.http.HttpServletResponse
 @Component
 class RequestInterceptor: HandlerInterceptor {
 
-    val log = LoggerFactory.getLogger(RequestInterceptor::class.java);
-    //val zipHandler = CompressHandler()
+    val log = LoggerFactory.getLogger(RequestInterceptor::class.java)
+    val zipHandler = CompressHandler()
 
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, dataObject: Any) : Boolean{
         log.info("1. PreHandle method.")
-        //var body : String = zipHandler.ungzip(request as ByteArray)
+       // var body : String? = zipHandler.unZipStream(request.inputStream)
         return true
     }
 
