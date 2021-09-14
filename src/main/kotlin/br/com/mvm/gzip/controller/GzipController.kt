@@ -25,7 +25,7 @@ class GzipController {
     fun postGzip(@RequestBody body: String): String {
         //var handler = CompressHandler()
         //var mBody : String = handler.ungzip(body.toByteArray())
-        return "body OK"
+        return "body OK - $body"
     }
 
 }

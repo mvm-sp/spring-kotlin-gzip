@@ -1,13 +1,16 @@
 package br.com.mvm.gzip.config
 
-import br.com.mvm.gzip.service.BufferRequestWrapper
-import br.com.mvm.gzip.service.BufferedResponseWrapper
-import br.com.mvm.gzip.service.CompressHandler
+import br.com.mvm.gzip.service.*
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStream
+import java.io.InputStreamReader
 import java.util.*
 import javax.servlet.*
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletRequestWrapper
 import javax.servlet.http.HttpServletResponse
 
 
@@ -30,7 +33,7 @@ class RequestFilter : Filter {
         val zipHandler = CompressHandler()
 
         val requestMap = getTypeSafeRequestMap(request   as HttpServletRequest)
-
+        var httpServletRequest = request
         val body : String
 
 
@@ -47,17 +50,31 @@ class RequestFilter : Filter {
 
         log.info(logMessage.toString())
 
-        if (chain != null) {
-            chain.doFilter(bufferedRequest, bufferedResponse)
+        val contentEncoding: String = request.getHeader("Content-Encoding")
+
+        if (contentEncoding != null && contentEncoding.indexOf("gzip") > -1){
+
+            var streamHelper = StreamHelper()
+            try {
+                val decompressStream: InputStream = streamHelper.decompressStream(httpServletRequest.getInputStream())!!
+                httpServletRequest = object : HttpServletRequestWrapper(httpServletRequest as HttpServletRequest) {
+                    @Throws(IOException::class)
+                    override fun getInputStream(): ServletInputStream {
+                        return DecompressServletInputStream(decompressStream)
+                    }
+
+                    @Throws(IOException::class)
+                    override fun getReader(): BufferedReader {
+                        return BufferedReader(InputStreamReader(decompressStream))
+                    }
+                }
+            } catch (e: IOException) {
+                log.error("error while handling the request", e)
+            }
+
         }
 
-        if (requestMap != null) {
-            if(requestMap.isEmpty()){
-                body = bufferedRequest.getRequestBody().toString()
-            }else{
-                body =  "TODO" //zipHandler.unZipStream(request.inputStream).toString()
-            }
-        }
+        chain?.doFilter(httpServletRequest, response)
 
     }
 
@@ -78,3 +95,4 @@ class RequestFilter : Filter {
     }
 
 }
+
